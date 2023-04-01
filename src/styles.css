@@ -1,37 +1,97 @@
+:root {
+  --subtext_size: 0.8rem;
+  --maintext_size: 1.3rem;
+  --background_color: rgb(15, 50, 50);
+  --mainfont_color: rgb(255, 230, 195);
+  --subfont_color: rgb(255, 255, 255);
+  --inputbg_color: rgb(0, 0, 0);
+}
+
+body {
+  background-color: var(--background_color);
+}
+
 .App {
   font-family: sans-serif;
   text-align: center;
-  min-height: 90vh;
-  background-color: darkslategray;
-  color: antiquewhite;
-  font-size: 1.2rem;
+  min-height: 100vh;
+  background-color: var(--background_color);
+  color: var(--mainfont_color);
+  font-size: var(--maintext_size);
 }
 
-.newEntrySubmit input,
-.newEntrySubmit button {
-  font-size: 1.5rem;
-  background-color: black;
-  color: antiquewhite;
+.subtitle {
+  font-size: var(--subtext_size);
+  margin-top: -30px;
+}
+
+.addEntryButton,
+.priorityDropDown,
+.toDoInput {
+  font-size: var(--maintext_size);
+  margin: 10px;
+  background-color: var(--inputbg_color);
+  color: var(--mainfont_color);
 }
 
 .entryRow {
   width: 100%;
   display: flex;
-  justify-content: space-between;
 }
 
-.crossedOut {
+.crossedOut,
+.crossedOutDate,
+.crossedOutPriority {
   text-decoration: line-through;
+}
+
+.date,
+.crossedOutDate,
+.priority,
+.crossedOutPriority {
+  font-size: var(--subtext_size);
+  color: var(--subfont_color);
+}
+
+.entryText {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 50%;
+  overflow-wrap: break-word;
 }
 
 .crossOutButton,
 .entry,
 .crossedOut,
+.date,
+.crossedOutDate,
+.priority,
+.crossedOutPriority,
 .delButton {
   align-self: center;
 }
 
 .delButton {
   margin-left: auto;
-  margin-right: 20px;
+  margin-right: 10px;
+}
+
+.crossOutButton {
+  appearance: none;
+  background-color: var(--mainfont_color);
+  border: 2px double var(--background_color);
+  border-radius: 10%;
+  margin-left: 30px;
+  margin-right: auto;
+  width: 32px;
+  height: 32px;
+}
+
+.crossOutButton:checked:after {
+  content: "\2714";
+  font-size: var(--maintext_size);
+  position: relative;
+  top: 3px;
+  left: 6px;
+  color: var(--background_color);
 }
