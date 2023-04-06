@@ -1,6 +1,5 @@
 import "./normalize.css";
 import "./styles.css";
-import doitLogo from "../public/doitlogo.png";
 
 import { useState, useEffect } from "react";
 
@@ -54,7 +53,7 @@ export default function App() {
 
   return (
     <div className="App">
-      <img src={doitLogo} alt="Doit Logo" />
+      <img src="./doitlogo.png" alt="Doit Logo" />
       <p className="subtitle">The EZPZ To-Do List</p>
       <NewEntrySubmit
         setEntryArray={setEntryArray}
