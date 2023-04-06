@@ -1,10 +1,48 @@
 import "./normalize.css";
 import "./styles.css";
+import doitLogo from "../public/doitlogo.png";
 
 import { useState, useEffect } from "react";
 
+function sortArray(entryArray, sortType) {
+  switch (sortType) {
+    case "alpha": {
+      entryArray.sort((a, b) => {
+        if (a.text.toUpperCase() > b.text.toUpperCase()) {
+          return 1;
+        } else if (b.text.toUpperCase() > a.text.toUpperCase()) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+      break;
+    }
+    case "priority": {
+      entryArray.sort((a, b) => a.priority - b.priority);
+      break;
+    }
+    case "datetime": {
+      entryArray.sort((a, b) => a.timestamp - b.timestamp);
+      break;
+    }
+    case "compfirst": {
+      entryArray.sort((a, b) => b.isDone - a.isDone);
+      break;
+    }
+    case "complast": {
+      entryArray.sort((a, b) => a.isDone - b.isDone);
+      break;
+    }
+    default:
+      entryArray.sort((a, b) => a.priority - b.priority);
+      break;
+  }
+}
+
 export default function App() {
   const [entryArray, setEntryArray] = useState([]);
+  const [sortType, setSortType] = useState("priority");
 
   //useEffect Hook to load from localstorage, if it exists
   useEffect(() => {
@@ -16,18 +54,24 @@ export default function App() {
 
   return (
     <div className="App">
-      <img src="doitlogo.png" alt="Doit Logo" />
+      <img src={doitLogo} alt="Doit Logo" />
       <p className="subtitle">The EZPZ To-Do List</p>
-      <NewEntrySubmit setEntryArray={setEntryArray} entryArray={entryArray} />
+      <NewEntrySubmit
+        setEntryArray={setEntryArray}
+        entryArray={entryArray}
+        setSortType={setSortType}
+        sortType={sortType}
+      />
       <hr />
       {entryArray.map((entry, idx) => {
         return (
           <>
-            <div className="entryRow" key={entry.dt}>
+            <div className="entryRow" key={entry.timestamp}>
               <ListEntry
                 idx={idx}
                 entryArray={entryArray}
                 setEntryArray={setEntryArray}
+                sortType={sortType}
               />
             </div>
             <hr />
@@ -44,28 +88,31 @@ export default function App() {
  *
  * @param entryArray the array of ToDo entries
  * @param setEntryArray the setter function of the entryArray
+ * @param sortType a string denoting the type of sort to utilize
+ * @param setSortType the setter function of sortType
  *****************************************************************************/
-function NewEntrySubmit({ entryArray, setEntryArray }) {
+function NewEntrySubmit({ entryArray, setEntryArray, sortType, setSortType }) {
   const [entryText, setEntryText] = useState("");
   const [priorityVal, setPriorityVal] = useState(1);
 
   function handleSubmit(event) {
     event.preventDefault();
 
-    const dt = new Date().toLocaleString();
+    const dt = new Date();
+    const ts = Date.now();
 
     if (entryText) {
       let newEntry = {
         text: entryText,
         isDone: false,
         dt: dt,
+        timestamp: ts,
+        dtstring: dt.toLocaleString(),
         priority: priorityVal
       };
       //Update entryArray state
       entryArray.push(newEntry);
-      entryArray.sort(function (a, b) {
-        return a.priority - b.priority;
-      });
+      sortArray(entryArray, sortType);
       setEntryArray(entryArray.slice());
 
       //Update entryArray in localstorage
@@ -105,6 +152,51 @@ function NewEntrySubmit({ entryArray, setEntryArray }) {
           Add Entry
         </button>
       </form>
+      <SortSelector
+        sortType={sortType}
+        setSortType={setSortType}
+        entryArray={entryArray}
+        setEntryArray={setEntryArray}
+      />
+    </div>
+  );
+}
+
+/******************************************************************************
+ * SortSelector component, renders the sort-by dropdown and the sort
+ * submit button
+ *
+ * @param entryArray the array of ToDo entries
+ * @param setEntryArray the setter function of the entryArray
+ * @param sortType a string denoting the type of sort to utilize
+ * @param setSortType the setter function of sortType
+ *****************************************************************************/
+function SortSelector({ entryArray, setEntryArray, sortType, setSortType }) {
+  function handleSubmit(event) {
+    event.preventDefault();
+    sortArray(entryArray, sortType);
+    setEntryArray(entryArray.slice());
+  }
+  return (
+    <div className="sortSelector">
+      <form onSubmit={handleSubmit}>
+        <select
+          className="sortDropDown"
+          value={sortType}
+          onChange={function (e) {
+            setSortType(e.target.value);
+          }}
+        >
+          <option value="priority">Priority</option>
+          <option value="datetime">Date/Time Added</option>
+          <option value="alpha">Alphabetical</option>
+          <option value="compfirst">Completed First</option>
+          <option value="complast">Completed Last</option>
+        </select>
+        <button type="submit" className="sortButton">
+          Sort
+        </button>
+      </form>
     </div>
   );
 }
@@ -115,8 +207,9 @@ function NewEntrySubmit({ entryArray, setEntryArray }) {
  * @param idx the array index of the entry to display
  * @param entryArray the array of ToDo entries
  * @param setEntryArray the setter function of the entryArray
+ * @param sortType a string denoting the sort type to utilize
  *****************************************************************************/
-function ListEntry({ idx, entryArray, setEntryArray }) {
+function ListEntry({ idx, entryArray, setEntryArray, sortType }) {
   return (
     <div className="entryRow">
       <CrossOutButton
@@ -130,7 +223,7 @@ function ListEntry({ idx, entryArray, setEntryArray }) {
           {entryArray[idx].text}
         </p>
         <p className={entryArray[idx].isDone ? "crossedOutDate" : "date"}>
-          Added: {entryArray[idx].dt}
+          Added: {entryArray[idx].dtstring}
         </p>
         <p
           className={entryArray[idx].isDone ? "crossedOutPriority" : "priority"}
@@ -141,6 +234,7 @@ function ListEntry({ idx, entryArray, setEntryArray }) {
       <DeleteButton
         entryArray={entryArray}
         setEntryArray={setEntryArray}
+        sortType={sortType}
         idx={idx}
       />
       <br />
@@ -155,14 +249,13 @@ function ListEntry({ idx, entryArray, setEntryArray }) {
  * @param idx the array index of the entry to delete
  * @param entryArray the array of ToDo entries
  * @param setEntryArray the setter function of the entryArray
+ * @param sortType a string denoting what type of sort to utilize
  *****************************************************************************/
-function DeleteButton({ idx, entryArray, setEntryArray }) {
+function DeleteButton({ idx, entryArray, setEntryArray, sortType }) {
   //Delete an entry from the array state
   function delEntry() {
     entryArray.splice(idx, 1);
-    entryArray.sort(function (a, b) {
-      return a.priority - b.priority;
-    });
+    sortArray(entryArray, sortType);
     setEntryArray(entryArray.slice());
     //Update entryArray in localstorage
     let str = JSON.stringify(entryArray);

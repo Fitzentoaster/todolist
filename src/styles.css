@@ -27,7 +27,9 @@ body {
 
 .addEntryButton,
 .priorityDropDown,
-.toDoInput {
+.toDoInput,
+.sortDropDown,
+.sortButton {
   font-size: var(--maintext_size);
   margin: 10px;
   background-color: var(--inputbg_color);
@@ -67,7 +69,8 @@ body {
 .crossedOutDate,
 .priority,
 .crossedOutPriority,
-.delButton {
+.delButton,
+.sortButton {
   align-self: center;
 }
 
